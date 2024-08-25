@@ -100,6 +100,7 @@ public class BrokerStartup {
         }
 
         Properties properties = null;
+        // 解析命令行中传的-c参数
         if (commandLine.hasOption('c')) {
             String file = commandLine.getOptionValue('c');
             if (file != null) {
@@ -125,7 +126,7 @@ public class BrokerStartup {
             System.exit(-2);
         }
 
-        // Validate namesrvAddr
+        // Validate namesrvAddr 获取nameServer地址
         String namesrvAddr = brokerConfig.getNamesrvAddr();
         if (StringUtils.isNotBlank(namesrvAddr)) {
             try {
@@ -147,6 +148,7 @@ public class BrokerStartup {
 
         // Set broker role according to ha config
         if (!brokerConfig.isEnableControllerMode()) {
+            // 主从配置
             switch (messageStoreConfig.getBrokerRole()) {
                 case ASYNC_MASTER:
                 case SYNC_MASTER:
@@ -212,6 +214,7 @@ public class BrokerStartup {
         authConfig.setClusterName(brokerConfig.getBrokerClusterName());
         authConfig.setAuthConfigPath(messageStoreConfig.getStorePathRootDir() + File.separator + "config");
 
+        // 【核心】创建brokerController
         final BrokerController controller = new BrokerController(
             brokerConfig, nettyServerConfig, nettyClientConfig, messageStoreConfig, authConfig);
 
@@ -245,6 +248,7 @@ public class BrokerStartup {
     public static BrokerController createBrokerController(String[] args) {
         try {
             BrokerController controller = buildBrokerController(args);
+            // 【核心】
             boolean initResult = controller.initialize();
             if (!initResult) {
                 controller.shutdown();
