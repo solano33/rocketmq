@@ -772,10 +772,15 @@ public class BrokerController {
     }
 
     public boolean initializeMetadata() {
+        // 加载Broker中的主题信息  json文件
         boolean result = this.topicConfigManager.load();
+        //
         result = result && this.topicQueueMappingManager.load();
+        // 加载消费进度
         result = result && this.consumerOffsetManager.load();
+        // 加载订阅消息
         result = result && this.subscriptionGroupManager.load();
+        // 加载消费者过滤消息
         result = result && this.consumerFilterManager.load();
         result = result && this.consumerOrderInfoManager.load();
         return result;
@@ -821,11 +826,13 @@ public class BrokerController {
 
     public boolean initialize() throws CloneNotSupportedException {
 
+        // 从文件中加载配置信息
         boolean result = this.initializeMetadata();
         if (!result) {
             return false;
         }
 
+        // 存储组件启动（包含零拷贝MMAP技术）
         result = this.initializeMessageStore();
         if (!result) {
             return false;
