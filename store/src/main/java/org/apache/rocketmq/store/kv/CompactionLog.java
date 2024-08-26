@@ -113,6 +113,7 @@ public class CompactionLog {
         this.compactionCqFilePath = compactionStore.getCompactionCqPath();        // batch consume queue already separated
         this.positionMgr = compactionStore.getPositionMgr();
 
+        // 默认使用可重入锁，以前默认是自旋锁。异步刷盘建议使用自旋锁，同步刷盘建议使用可重入锁
         this.putMessageLock =
             messageStore.getMessageStoreConfig().isUseReentrantLockWhenPutMessage() ? new PutMessageReentrantLock() :
                 new PutMessageSpinLock();
@@ -387,6 +388,7 @@ public class CompactionLog {
             return CompletableFuture.completedFuture(new PutMessageResult(PutMessageStatus.MESSAGE_ILLEGAL, null));
         }
 
+        // 加锁，避免并发写文件。这里默认使用了可重入锁
         putMessageLock.lock();
         try {
             long beginTime = System.nanoTime();

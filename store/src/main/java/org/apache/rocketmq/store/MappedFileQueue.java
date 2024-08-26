@@ -235,9 +235,9 @@ public class MappedFileQueue implements Swappable {
 
 
     public boolean load() {
-        // 这个dir是consumequene这一层的文件夹
+        // 这个dir是commitlog这一层的文件夹
         File dir = new File(this.storePath);
-        // 这里列出来的是consumequene下的所有topic
+        // 这里列出来的是commitlog下的所有文件，每个文件大小是1G
         File[] ls = dir.listFiles();
         if (ls != null) {
             return doLoad(Arrays.asList(ls));
@@ -250,6 +250,7 @@ public class MappedFileQueue implements Swappable {
         files.sort(Comparator.comparing(File::getName));
 
         for (int i = 0; i < files.size(); i++) {
+            //
             File file = files.get(i);
             if (file.isDirectory()) {
                 continue;

@@ -159,7 +159,7 @@ public class CommitLog implements Swappable {
     }
 
     public boolean load() {
-        // consumequene文件夹中有多个topic文件夹，每个文件夹下又有n个quene文件
+        // 加载commitlog文件
         boolean result = this.mappedFileQueue.load();
         if (result && !defaultMessageStore.getMessageStoreConfig().isDataReadAheadEnable()) {
             scanFileAndSetReadMode(LibC.MADV_RANDOM);
@@ -900,6 +900,11 @@ public class CommitLog implements Swappable {
         }
     }
 
+    /**
+     * 核心，commitlog
+     * @param msg
+     * @return
+     */
     public CompletableFuture<PutMessageResult> asyncPutMessage(final MessageExtBrokerInner msg) {
         // Set the storage time
         if (!defaultMessageStore.getMessageStoreConfig().isDuplicationEnable()) {
@@ -969,6 +974,7 @@ public class CommitLog implements Swappable {
             }
         }
 
+        // 加锁，避免并发写入commitlog文件
         topicQueueLock.lock(topicQueueKey);
         try {
 
