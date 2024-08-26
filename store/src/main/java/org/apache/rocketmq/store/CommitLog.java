@@ -159,6 +159,7 @@ public class CommitLog implements Swappable {
     }
 
     public boolean load() {
+        // consumequene文件夹中有多个topic文件夹，每个文件夹下又有n个quene文件
         boolean result = this.mappedFileQueue.load();
         if (result && !defaultMessageStore.getMessageStoreConfig().isDataReadAheadEnable()) {
             scanFileAndSetReadMode(LibC.MADV_RANDOM);

@@ -850,8 +850,10 @@ public class BrokerController {
             this.replicasManager.setFenced(true);
         }
 
+        // mmap核心
         if (messageStore != null) {
             registerMessageStoreHook();
+            // load
             result = this.messageStore.load();
         }
 
