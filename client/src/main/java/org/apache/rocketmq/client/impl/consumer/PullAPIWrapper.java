@@ -218,14 +218,20 @@ public class PullAPIWrapper {
                 sysFlagInner = PullSysFlag.clearCommitOffsetFlag(sysFlagInner);
             }
 
+            // 【核心】长轮询
             PullMessageRequestHeader requestHeader = new PullMessageRequestHeader();
             requestHeader.setConsumerGroup(this.consumerGroup);
+            // 订阅信息
             requestHeader.setTopic(mq.getTopic());
             requestHeader.setQueueId(mq.getQueueId());
             requestHeader.setQueueOffset(offset);
+
             requestHeader.setMaxMsgNums(maxNums);
             requestHeader.setSysFlag(sysFlagInner);
             requestHeader.setCommitOffset(commitOffset);
+
+            // brokerSuspendMaxTimeMillis：broker在没有消息拉取的时候会暂停等待多久返回给消费者客户端
+            // 默认：15s
             requestHeader.setSuspendTimeoutMillis(brokerSuspendMaxTimeMillis);
             requestHeader.setSubscription(subExpression);
             requestHeader.setSubVersion(subVersion);
@@ -241,6 +247,10 @@ public class PullAPIWrapper {
             PullResult pullResult = this.mQClientFactory.getMQClientAPIImpl().pullMessage(
                 brokerAddr,
                 requestHeader,
+
+                // timeoutMillis：消费者客户端最长等待多久broker返回消息的
+                // 默认：30s
+                //  在消费者客户端，我们可以看到timeoutMillis的使用，控制了请求超时时间
                 timeoutMillis,
                 communicationMode,
                 pullCallback);

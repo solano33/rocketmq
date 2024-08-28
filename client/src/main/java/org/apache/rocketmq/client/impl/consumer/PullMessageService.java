@@ -128,6 +128,7 @@ public class PullMessageService extends ServiceThread {
 
         while (!this.isStopped()) {
             try {
+                // 从阻塞队列中拿拉PullRequest，这里包含对应的消费者组、topic、拉取偏移量
                 MessageRequest messageRequest = this.messageRequestQueue.take();
                 if (messageRequest.getMessageRequestMode() == MessageRequestMode.POP) {
                     this.popMessage((PopRequest) messageRequest);

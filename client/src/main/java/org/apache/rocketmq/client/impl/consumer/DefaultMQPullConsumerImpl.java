@@ -736,6 +736,7 @@ public class DefaultMQPullConsumerImpl implements MQConsumerInner {
                         null);
                 }
 
+                // 核心：启动各种服务
                 mQClientFactory.start();
                 log.info("the consumer [{}] start OK", this.defaultMQPullConsumer.getConsumerGroup());
                 this.serviceState = ServiceState.RUNNING;

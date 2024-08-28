@@ -891,6 +891,7 @@ public class DefaultMessageStore implements MessageStore {
                             }
 
                             if (messageFilter != null
+                                    // 处理tag 消息的tag的会以hash值形式存储在ConsumeQueue，由于ConsumeQueue是索引，所以Broker端查询消息前会进行过滤
                                 && !messageFilter.isMatchedByConsumeQueue(cqUnit.getValidTagsCodeAsLong(), cqUnit.getCqExtUnit())) {
                                 if (getResult.getBufferTotalSize() == 0) {
                                     status = GetMessageStatus.NO_MATCHED_MESSAGE;
@@ -899,6 +900,7 @@ public class DefaultMessageStore implements MessageStore {
                                 continue;
                             }
 
+                            // 根据偏移量从commitlog中查询消息
                             SelectMappedBufferResult selectResult = this.commitLog.getMessage(offsetPy, sizePy);
                             if (null == selectResult) {
                                 if (getResult.getBufferTotalSize() == 0) {
@@ -914,6 +916,7 @@ public class DefaultMessageStore implements MessageStore {
                             }
 
                             if (messageFilter != null
+                                    // 二次过滤
                                 && !messageFilter.isMatchedByCommitLog(selectResult.getByteBuffer().slice(), null)) {
                                 if (getResult.getBufferTotalSize() == 0) {
                                     status = GetMessageStatus.NO_MATCHED_MESSAGE;

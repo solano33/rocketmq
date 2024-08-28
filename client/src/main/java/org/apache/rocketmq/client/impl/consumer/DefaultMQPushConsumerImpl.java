@@ -243,6 +243,10 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
         this.offsetStore = offsetStore;
     }
 
+    /**
+     * pull拉消息主体
+     * @param pullRequest
+     */
     public void pullMessage(final PullRequest pullRequest) {
         final ProcessQueue processQueue = pullRequest.getProcessQueue();
         if (processQueue.isDropped()) {
@@ -367,6 +371,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                                     pullRequest.getMessageQueue().getTopic(), pullResult.getMsgFoundList().size());
 
                                 boolean dispatchToConsume = processQueue.putMessage(pullResult.getMsgFoundList());
+                                // 放到线程池中消费
                                 DefaultMQPushConsumerImpl.this.consumeMessageService.submitConsumeRequest(
                                     pullResult.getMsgFoundList(),
                                     processQueue,
@@ -917,6 +922,11 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
         }
     }
 
+    /**
+     * 核心 consumer启动逻辑
+     *
+     * @throws MQClientException
+     */
     public synchronized void start() throws MQClientException {
         switch (this.serviceState) {
             case CREATE_JUST:

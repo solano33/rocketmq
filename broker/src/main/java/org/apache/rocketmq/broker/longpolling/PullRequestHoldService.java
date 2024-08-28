@@ -41,8 +41,16 @@ public class PullRequestHoldService extends ServiceThread {
         this.brokerController = brokerController;
     }
 
+    /**
+     * 【核心】长轮询，Broker将当前请求的快照信息保存下来
+     *
+     * @param topic
+     * @param queueId
+     * @param pullRequest
+     */
     public void suspendPullRequest(final String topic, final int queueId, final PullRequest pullRequest) {
         String key = this.buildKey(topic, queueId);
+        // 保存到一个ConcurrentMap中，其中key为topic@queueId，value为list
         ManyPullRequest mpr = this.pullRequestTable.get(key);
         if (null == mpr) {
             mpr = new ManyPullRequest();
@@ -70,12 +78,14 @@ public class PullRequestHoldService extends ServiceThread {
         while (!this.isStopped()) {
             try {
                 if (this.brokerController.getBrokerConfig().isLongPollingEnable()) {
+                    // 5秒检查一次
                     this.waitForRunning(5 * 1000);
                 } else {
                     this.waitForRunning(this.brokerController.getBrokerConfig().getShortPollingTimeMills());
                 }
 
                 long beginLockTimestamp = this.systemClock.now();
+                // 检查hold住的长轮询请求
                 this.checkHoldRequest();
                 long costTime = this.systemClock.now() - beginLockTimestamp;
                 if (costTime > 5 * 1000) {

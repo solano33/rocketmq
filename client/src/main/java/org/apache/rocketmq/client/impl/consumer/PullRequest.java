@@ -20,8 +20,17 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.message.MessageRequestMode;
 
 public class PullRequest implements MessageRequest {
+    /**
+     * 订阅组
+     */
     private String consumerGroup;
+    /**
+     * 消息元数据
+     */
     private MessageQueue messageQueue;
+    /**
+     * 消息体
+     */
     private ProcessQueue processQueue;
     private long nextOffset;
     private boolean previouslyLocked = false;

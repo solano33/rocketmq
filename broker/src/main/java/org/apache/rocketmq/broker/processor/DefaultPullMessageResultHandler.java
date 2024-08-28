@@ -172,6 +172,7 @@ public class DefaultPullMessageResultHandler implements PullMessageResultHandler
                 final boolean hasSuspendFlag = PullSysFlag.hasSuspendFlag(requestHeader.getSysFlag());
                 final long suspendTimeoutMillisLong = hasSuspendFlag ? requestHeader.getSuspendTimeoutMillis() : 0;
 
+                // 【核心】长轮询
                 if (brokerAllowSuspend && hasSuspendFlag) {
                     long pollingTimeMills = suspendTimeoutMillisLong;
                     if (!this.brokerController.getBrokerConfig().isLongPollingEnable()) {
@@ -183,6 +184,7 @@ public class DefaultPullMessageResultHandler implements PullMessageResultHandler
                     int queueId = requestHeader.getQueueId();
                     PullRequest pullRequest = new PullRequest(request, channel, pollingTimeMills,
                         this.brokerController.getMessageStore().now(), offset, subscriptionData, messageFilter);
+                    // Broker将当前请求加入等待队列，response置为null, 这样不会立即把响应写到消费者客户端。
                     this.brokerController.getPullRequestHoldService().suspendPullRequest(topic, queueId, pullRequest);
                     return null;
                 }

@@ -298,6 +298,14 @@ public class MQClientInstance {
         return mqList;
     }
 
+    /**
+     * 消费者客户端主要包含了几个核心组件服务
+     * 1、偏移量加载服务 => 记录消息消费进度
+     * 2、消息拉取服务 => 建立连接，拉取消息
+     * 3、负载均衡服务 => 分配消费队列
+     * 4、消息消费服务 => 回调消费消息业务逻辑
+     * @throws MQClientException
+     */
     public void start() throws MQClientException {
 
         synchronized (this) {
@@ -308,17 +316,18 @@ public class MQClientInstance {
                     if (null == this.clientConfig.getNamesrvAddr()) {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
-                    // Start request-response channel
+                    // Start request-response channel 启动netty客户端，和Broker建立通信连接
                     this.mQClientAPIImpl.start();
-                    // Start various schedule tasks
+                    // Start various schedule tasks 开启一些定时任务
                     this.startScheduledTask();
-                    // Start pull service
+                    // Start pull service 启动拉消息的服务，通过线程异步拉取
                     this.pullMessageService.start();
-                    // Start rebalance service
+                    // Start rebalance service 启动负载均衡服务
                     this.rebalanceService.start();
-                    // Start push service
+                    // Start push service 启动内置消息发送服务
                     this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);
+                    // 更新消费者启动状态
                     this.serviceState = ServiceState.RUNNING;
                     break;
                 case START_FAILED:
